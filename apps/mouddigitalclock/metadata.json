@@ -1,0 +1,16 @@
+{ "id": "mouddigitalclock",
+  "name": "Moud Digital Clock",
+  "version": "0.01",
+  "description": "Digital clock with seconds",
+  "icon": "mouddigitalclock.app.png",
+  "screenshots": [{"url":"screenshot.png"},{"url":"screenshot2.png"}],
+  "type": "clock",
+  "tags": "clock,clkinfo",
+  "supports" : ["BANGLEJS2"],
+  "readme": "README.md",
+  "dependencies" : { "clock_info":"module" },
+  "storage": [
+    {"name":"mouddigitalclock.app.js","url":"mouddigitalclock.app.js"},
+    {"name":"mouddigitalclock.img","url":"mouddigitalclock.app-icon.js","evaluate":true}
+  ]
+}
