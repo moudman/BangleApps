@@ -11,7 +11,7 @@
   }
   
   var menu = {
-    '': { 'title': 'My Custom Clock' },
+    '': { 'title': 'Moud Digital Clock' },
     '< Back': back,
     'Show Seconds': {
       value: settings.showSeconds,
