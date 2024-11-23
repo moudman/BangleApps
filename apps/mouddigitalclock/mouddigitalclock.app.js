@@ -8,7 +8,7 @@ Graphics.prototype.setFont7Seg = function() {
   // Load settings
   let settings;
   function loadSettings() {
-    settings = require('Storage').readJSON('lcdclockplus.settings.json', 1) || {};
+    settings = require('Storage').readJSON('mouddigitalclock.settings.json', 1) || {};
     settings.tempUnit = settings.tempUnit || "C";
   }
   loadSettings();
@@ -203,7 +203,7 @@ Graphics.prototype.setFont7Seg = function() {
   let clockInfoItems = require("clock_info").load();
   // Removed clockInfoMenu for the upper left corner
   let clockInfoMenu2 = require("clock_info").addInteractive(clockInfoItems, {
-    app: "lcdclockplus",
+    app: "mouddigitalclock",
     x: midX + 1,
     y: R.y,
     w: midX - 2,
@@ -211,7 +211,7 @@ Graphics.prototype.setFont7Seg = function() {
     draw: clockInfoDraw
   });
   let clockInfoMenu3 = require("clock_info").addInteractive(clockInfoItems, {
-    app: "lcdclockplus",
+    app: "mouddigitalclock",
     x: R.x,
     y: bar2Y + 2,
     w: midX - 2,
@@ -219,7 +219,7 @@ Graphics.prototype.setFont7Seg = function() {
     draw: clockInfoDraw
   });
   let clockInfoMenu4 = require("clock_info").addInteractive(clockInfoItems, {
-    app: "lcdclockplus",
+    app: "mouddigitalclock",
     x: midX + 1,
     y: bar2Y + 2,
     w: midX - 2,
