@@ -2,9 +2,9 @@ Graphics.prototype.setFont7Seg = function() {
   return this.setFontCustom(atob("AAAAAAAAAAAACAQCAAAAAAIAd0BgMBdwAAAAAAAADuAAAB0RiMRcAAAAAiMRiLuAAAcAQCAQdwAADgiMRiIOAAAd0RiMRBwAAAAgEAgDuAAAd0RiMRdwAADgiMRiLuAAAABsAAAd0QiEQdwAADuCIRCIOAAAd0BgMBAAAAAOCIRCLuAAAd0RiMRAAAADuiEQiAAAAAd0BgMBBwAADuCAQCDuAAAdwAAAAAAAAAAAIBALuAAAdwQCAQdwAADuAIBAIAAAAd0AgEAcEAgEAdwAd0AgEAdwAADugMBgLuAAAd0QiEQcAAADgiEQiDuAAAd0AgEAAAAADgiMRiIOAAAAEAgEAdwAADuAIBALuAAAdwBAIBdwAADuAIBAIOAIBALuADuCAQCDuAAAcAQCAQdwAAAOiMRiLgAAAA=="), 32, atob("BwAAAAAAAAAAAAAAAAcCAAcHBwcHBwcHBwcEAAAAAAAABwcHBwcHBwcHBwcHCgcHBwcHBwcHBwoHBwc="), 9);
 };
 
-{ // our scope
+{ // must be inside our own scope here so that when we are unloaded everything disappears
+  // we also define functions using 'let fn = function() {..}' for the same reason. function decls are global
 let drawTimeout;
-
 // Load settings
 var settings = Object.assign({
   showSeconds: true,
@@ -19,10 +19,10 @@ let tempArea;
 
 // Actually draw the watch face
 let draw = function() {
-  var x = R.x + R.w / 2;
+  var x = R.x + R.w/2;
   var y = R.y + 48;
   g.reset().setColor(g.theme.bg).setBgColor(g.theme.fg);
-  g.clearRect(R.x, bar1Y + 2, R.x2, bar2Y - 2);
+  g.clearRect(R.x, bar1Y+2, R.x2, bar2Y-2);
   var date = new Date();
   var hours = date.getHours();
   var minutes = date.getMinutes();
@@ -35,26 +35,21 @@ let draw = function() {
 
   var hoursStr = ("0" + hours).substr(-2);
   var minutesStr = ("0" + minutes).substr(-2);
+  var secondsStr = ("0" + seconds).substr(-2);
+
   var timeStr = hoursStr + ":" + minutesStr;
+  var secondsDisplay = ":" + secondsStr;
 
   // Measure widths and heights
   g.setFont("7x11Numeric7Seg:4");
   var timeWidth = g.stringWidth(timeStr);
   var timeHeight = g.getFontHeight();
 
-  var totalWidth = timeWidth;
+  g.setFont("7x11Numeric7Seg:2");
+  var secondsWidth = g.stringWidth(secondsDisplay);
+  var secondsHeight = g.getFontHeight();
 
-  // Include seconds if enabled
-  if (settings.showSeconds) {
-    var secondsStr = ("0" + seconds).substr(-2);
-    var secondsDisplay = ":" + secondsStr;
-    g.setFont("7x11Numeric7Seg:2");
-    var secondsWidth = g.stringWidth(secondsDisplay);
-    var secondsHeight = g.getFontHeight();
-    totalWidth += secondsWidth;
-  } else {
-    var secondsWidth = 0;
-  }
+  var totalWidth = timeWidth + secondsWidth;
 
   var startX = x - totalWidth / 2;
 
@@ -67,12 +62,10 @@ let draw = function() {
   g.setFontAlign(-1, 1); // Left alignment, bottom alignment
   g.drawString(timeStr, startX, yBaseline);
 
-  // Draw seconds if enabled
-  if (settings.showSeconds) {
-    g.setFont("7x11Numeric7Seg:2");
-    g.setFontAlign(-1, 1); // Left alignment, bottom alignment
-    g.drawString(secondsDisplay, startX + timeWidth, yBaseline);
-  }
+  // Draw seconds
+  g.setFont("7x11Numeric7Seg:2");
+  g.setFontAlign(-1, 1); // Left alignment, bottom alignment
+  g.drawString(secondsDisplay, startX + timeWidth, yBaseline);
 
   // Draw AM/PM if 12-hour mode
   if (is12Hour) {
@@ -80,15 +73,15 @@ let draw = function() {
     g.setFont("7Seg:2");
     g.setFontAlign(1, 1); // Right alignment, bottom alignment
 
-    // Position AM/PM above the seconds or time
-    var ampmX = R.x2 - 2; // Keep at the right side
-    var ampmY = yBaseline - (settings.showSeconds ? secondsHeight : 0) - 4;
+    // Position AM/PM above the seconds
+    var ampmX = R.x2 - 2; // Adjusted as per your preference
+    var ampmY = yBaseline - secondsHeight - 4; // Move up by secondsHeight plus clearance
 
     g.drawString(meridian, ampmX, ampmY);
   }
 
-  // Day of week (moved slightly to the right)
-  g.setFontAlign(-1, 0).setFont("7Seg:2").drawString(require("locale").dow(date, 1).toUpperCase(), R.x + 6, y);
+  // Day of week
+  g.setFontAlign(-1, 0).setFont("7Seg:2").drawString(require("locale").dow(date, 1).toUpperCase(), R.x+6, y);
 
   // Date
   g.setFontAlign(-1, 0).setFont("7Seg:2").drawString(require("locale").month(date, 2).toUpperCase(), x, y);
@@ -122,8 +115,8 @@ let draw = function() {
   var tempWidth = g.stringWidth(tempStr);
   var tempHeight = g.getFontHeight();
 
-  // Adjust tempX to move it to the right a few pixels
-  var tempX = tempArea.x + 6; // Move right by 6 pixels
+  // Center the text within the tempArea
+  var tempX = tempArea.x + 6;
   var tempY = tempArea.y + (tempArea.h - tempHeight) / 2;
 
   g.setFontAlign(-1, -1); // Left-top alignment
@@ -131,11 +124,10 @@ let draw = function() {
 
   // Queue next draw
   if (drawTimeout) clearTimeout(drawTimeout);
-  var interval = settings.showSeconds ? 1000 : 60000;
   drawTimeout = setTimeout(function() {
     drawTimeout = undefined;
     draw();
-  }, interval - (Date.now() % interval));
+  }, 1000 - (Date.now() % 1000));
 };
 
 let clockInfoDraw = (itm, info, options) => {
@@ -153,8 +145,8 @@ let clockInfoDraw = (itm, info, options) => {
 
 // Show launcher when middle button pressed
 Bangle.setUI({
-  mode: "clock",
-  remove: function() {
+  mode : "clock",
+  remove : function() {
     // Called to unload all of the clock app
     if (drawTimeout) clearTimeout(drawTimeout);
     drawTimeout = undefined;
@@ -171,8 +163,7 @@ Bangle.setUI({
     delete clockInfoMenu4;
     // reset theme
     g.setTheme(oldTheme);
-  }
-});
+  }});
 
 // Load widgets
 Bangle.loadWidgets();
@@ -202,8 +193,8 @@ Bangle.drawWidgets();
 // Allocate and draw clockinfos
 let clockInfoItems = require("clock_info").load();
 // Remove clockInfoMenu for the upper left corner
-//clockInfoMenu = require("clock_info").addInteractive(clockInfoItems, { app:"mouddigitalclock", x:R.x, y:R.y, w:midX - 2, h:bar1Y - R.y - 2, draw: clockInfoDraw });
-let clockInfoMenu2 = require("clock_info").addInteractive(clockInfoItems, { app:"mouddigitalclock", x:midX + 1, y:R.y, w:midX - 2, h:bar1Y - R.y - 2, draw: clockInfoDraw });
-let clockInfoMenu3 = require("clock_info").addInteractive(clockInfoItems, { app:"mouddigitalclock", x:R.x, y:bar2Y + 2, w:midX - 2, h:bar1Y - R.y - 2, draw: clockInfoDraw });
-let clockInfoMenu4 = require("clock_info").addInteractive(clockInfoItems, { app:"mouddigitalclock", x:midX + 1, y:bar2Y + 2, w:midX - 2, h:bar1Y - R.y - 2, draw: clockInfoDraw });
+//clockInfoMenu = require("clock_info").addInteractive(clockInfoItems, { app:"lcdclock", x:R.x, y:R.y, w:midX - 2, h:bar1Y - R.y - 2, draw : clockInfoDraw});
+let clockInfoMenu2 = require("clock_info").addInteractive(clockInfoItems, { app:"lcdclock", x:midX + 1, y:R.y, w:midX - 2, h:bar1Y - R.y - 2, draw : clockInfoDraw});
+let clockInfoMenu3 = require("clock_info").addInteractive(clockInfoItems, { app:"lcdclock", x:R.x, y:bar2Y + 2, w:midX - 2, h:bar1Y - R.y - 2, draw : clockInfoDraw});
+let clockInfoMenu4 = require("clock_info").addInteractive(clockInfoItems, { app:"lcdclock", x:midX + 1, y:bar2Y + 2, w:midX - 2, h:bar1Y - R.y - 2, draw : clockInfoDraw});
 }
