@@ -1,6 +1,6 @@
 { "id": "mouddigitalclock",
   "name": "Moud Digital Clock",
-  "version": "0.01",
+  "version": "0.02",
   "description": "Digital clock with seconds",
   "icon": "mouddigitalclock.app.png",
   "screenshots": [{"url":"screenshot.png"},{"url":"screenshot2.png"}],
